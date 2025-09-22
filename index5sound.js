@@ -6,6 +6,16 @@ const lovense = require('lovense-dart');
 const MemoryReader = require('memory-reader');
 const ffi = require('ffi-napi');
 const ref = require('ref-napi');
+const player = require('play-sound')(opts = {
+    player: 'mpg321' // You can use other players like 'mplayer' or 'omxplayer'
+});
+
+// Add these sound-related constants
+const SOUND_VOLUME = 0.5; // 50% volume
+const SOUND_FILES = {
+    intensityUp: 'sounds/intensity-up.mp3',
+    intensityDown: 'sounds/intensity-down.mp3'
+};
 
 const MAX_LOVENSE_POWER = 20; // Lovense API maximum
 const MAX_VIBRATION_STRENGTH = 100; // Our scale (0-100%)
@@ -155,7 +165,18 @@ function sendVibration(screenDistance) {
 // Add this function to change max strength during runtime
 function setMaxVibrationStrength(newStrength) {
     if (newStrength >= 0 && newStrength <= 100) {
+        const oldStrength = MAX_VIBRATION_STRENGTH;
         MAX_VIBRATION_STRENGTH = newStrength;
+        
+        // Play sound based on whether intensity increased or decreased
+        const soundFile = newStrength > oldStrength ? 
+            SOUND_FILES.intensityUp : 
+            SOUND_FILES.intensityDown;
+            
+        player.play(soundFile, { volume: SOUND_VOLUME }, (err) => {
+            if (err) console.error('Error playing sound:', err);
+        });
+        
         console.log(`Max vibration strength set to ${newStrength}%`);
     } else {
         console.log('Strength must be between 0 and 100');
