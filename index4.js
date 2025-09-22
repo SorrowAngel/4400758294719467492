@@ -7,8 +7,9 @@ const MemoryReader = require('memory-reader');
 const ffi = require('ffi-napi');
 const ref = require('ref-napi');
 
-const MAX_VIBRATION_STRENGTH = 50; // Start with 50% max intensity
-const MIN_VIBRATION_STRENGTH = 10; // Minimum 10% intensity
+const MAX_LOVENSE_POWER = 20; // Lovense API maximum
+const MAX_VIBRATION_STRENGTH = 100; // Our scale (0-100%)
+const MIN_VIBRATION_STRENGTH = 10; // Minimum intensity
 
 // Lovense toy settings - replace with your details!
 const toyName = 'YourToyName';
@@ -144,6 +145,9 @@ function sendVibration(screenDistance) {
             MAX_VIBRATION_STRENGTH * (1 - screenDistance)
         )
     );
+    
+    // Convert our 0-100 scale to Lovense's 0-20 scale
+    const lovenseIntensity = Math.floor((intensity / 100) * MAX_LOVENSE_POWER);
     
     lovense.command(toyName, 'Vibrate', intensity);
 }
