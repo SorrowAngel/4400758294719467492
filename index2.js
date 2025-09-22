@@ -89,7 +89,7 @@ async function startGameLoop() {
         try {
             // Find CS2 process with retry mechanism
             if (!processHandle) {
-                const processes = await MemoryReader.getProcessesByName('csgo2.exe');
+                const processes = await MemoryReader.getProcessesByName('cs2.exe');
                 
                 if (!processes || processes.length === 0) {
                     console.log('CS2 not found! Please start CS2.');
