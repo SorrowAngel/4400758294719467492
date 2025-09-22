@@ -1,7 +1,14 @@
+process.stdin.setRawMode(true);
+process.stdin.resume();
+process.stdin.setEncoding('utf8');
+
 const lovense = require('lovense-dart');
 const MemoryReader = require('memory-reader');
 const ffi = require('ffi-napi');
 const ref = require('ref-napi');
+
+const MAX_VIBRATION_STRENGTH = 50; // Start with 50% max intensity
+const MIN_VIBRATION_STRENGTH = 10; // Minimum 10% intensity
 
 // Lovense toy settings - replace with your details!
 const toyName = 'YourToyName';
@@ -129,9 +136,38 @@ function calculateScreenAngle(pos1, pos2, viewX, viewY) {
 function sendVibration(screenDistance) {
     if (!toyConnected) return;
     
-    const intensity = Math.max(0, Math.min(100, 100 * (1 - screenDistance)));
+    // Calculate intensity based on screen distance and max strength
+    const intensity = Math.max(
+        MIN_VIBRATION_STRENGTH,
+        Math.min(
+            MAX_VIBRATION_STRENGTH,
+            MAX_VIBRATION_STRENGTH * (1 - screenDistance)
+        )
+    );
+    
     lovense.command(toyName, 'Vibrate', intensity);
 }
+
+// Add this function to change max strength during runtime
+function setMaxVibrationStrength(newStrength) {
+    if (newStrength >= 0 && newStrength <= 100) {
+        MAX_VIBRATION_STRENGTH = newStrength;
+        console.log(`Max vibration strength set to ${newStrength}%`);
+    } else {
+        console.log('Strength must be between 0 and 100');
+    }
+}
+
+process.stdin.on('data', (key) => {
+    // Increase max strength with '+' key
+    if (key.toString() === 'F1') {
+        setMaxVibrationStrength(MAX_VIBRATION_STRENGTH + 10);
+    }
+    // Decrease max strength with '-' key
+    else if (key.toString() === 'F2') {
+        setMaxVibrationStrength(MAX_VIBRATION_STRENGTH - 10);
+    }
+});
 
 // Main game loop
 async function startGameLoop() {
